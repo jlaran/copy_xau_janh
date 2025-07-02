@@ -952,37 +952,38 @@ def update_account():
         print(request)
         print("❌ Error decoding JSON:", e)
         return "Bad Request", 400
+    return
 
-    # Validaciones
-    account_number = data.get("account")
-    account_balance = data.get("balance")
-    last_trade = data.get("last_trade")
-    server_key = data.get("server_key")
-    account_server = data.get("account_server")
-    broker_company = data.get("broker_company")
-    trade_mode = data.get("trade_mode")
-    risk_per_group = data.get("risk_per_group")
+    # # Validaciones
+    # account_number = data.get("account")
+    # account_balance = data.get("balance")
+    # last_trade = data.get("last_trade")
+    # server_key = data.get("server_key")
+    # account_server = data.get("account_server")
+    # broker_company = data.get("broker_company")
+    # trade_mode = data.get("trade_mode")
+    # risk_per_group = data.get("risk_per_group")
 
-    if not all([account_number, account_balance, last_trade, server_key, account_server, broker_company, trade_mode, risk_per_group]):
-        return jsonify({"error": "Faltan parámetros"}), 400
+    # if not all([account_number, account_balance, last_trade, server_key, account_server, broker_company, trade_mode, risk_per_group]):
+    #     return jsonify({"error": "Faltan parámetros"}), 400
 
-    # Validación + actualización
-    success, message = update_account_fields(
-        sheet,
-        account_number,
-        server_key,
-        account_balance,
-        last_trade,
-        trade_mode,
-        account_server,
-        broker_company,
-        risk_per_group
-    )
+    # # Validación + actualización
+    # success, message = update_account_fields(
+    #     sheet,
+    #     account_number,
+    #     server_key,
+    #     account_balance,
+    #     last_trade,
+    #     trade_mode,
+    #     account_server,
+    #     broker_company,
+    #     risk_per_group
+    # )
 
-    if success:
-        return jsonify({"message": message}), 200
-    else:
-        return jsonify({"error": message}), 401
+    # if success:
+    #     return jsonify({"message": message}), 200
+    # else:
+    #     return jsonify({"error": message}), 401
 
 #-------------- GOLD ------------------
 
