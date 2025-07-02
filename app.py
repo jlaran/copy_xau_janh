@@ -30,18 +30,18 @@ TELEGRAM_CHANNEL_JORGE_FOREX = int(os.getenv("TELEGRAM_CHANNEL_JORGE_FOREX"))
 TELEGRAM_CHANNEL_JORGE_XAU = int(os.getenv("TELEGRAM_CHANNEL_JORGE_XAU"))
 TELEGRAM_CHANNEL_JORGE_BTC = int(os.getenv("TELEGRAM_CHANNEL_JORGE_BTC"))
 
-TELEGRAM_CHANNEL_PRUEBA = int(os.getenv("TELEGRAM_CHANNEL_PRUEBA"))
+TELEGRAM_CHANNEL_PRUEBA_XAU = int(os.getenv("TELEGRAM_CHANNEL_PRUEBA_XAU"))
 
 TIME_TO_EXPIRE_SIGNAL = int(os.getenv("TIME_TO_EXPIRE_SIGNAL"))
 
-WATCHED_CHANNELS = [TELEGRAM_CHANNEL_JORGE_SINTETICOS, TELEGRAM_CHANNEL_JORGE_FOREX, TELEGRAM_CHANNEL_JORGE_XAU, TELEGRAM_CHANNEL_JORGE_BTC, TELEGRAM_CHANNEL_PRUEBA]
+WATCHED_CHANNELS = [TELEGRAM_CHANNEL_JORGE_SINTETICOS, TELEGRAM_CHANNEL_JORGE_FOREX, TELEGRAM_CHANNEL_JORGE_XAU, TELEGRAM_CHANNEL_JORGE_BTC, TELEGRAM_CHANNEL_PRUEBA_XAU]
 
 RAW_JSON = os.getenv("GOOGLE_CREDENTIALS")
 
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")  # ID del Google Sheet desde la URL
 WORKSHEET_NAME = os.getenv("WORKSHEET_NAME")
 
-required_vars = ["SPREADSHEET_ID", "WORKSHEET_NAME", "GOOGLE_CREDENTIALS", "TELEGRAM_API", "TELEGRAM_API_HASH", "TELEGRAM_CHANNEL_PRUEBA","TIME_TO_EXPIRE_SIGNAL","TELEGRAM_CHANNEL_JORGE_SINTETICOS","TELEGRAM_CHANNEL_JORGE_FOREX","TELEGRAM_CHANNEL_JORGE_XAU","TELEGRAM_CHANNEL_JORGE_BTC"]
+required_vars = ["SPREADSHEET_ID", "WORKSHEET_NAME", "GOOGLE_CREDENTIALS", "TELEGRAM_API", "TELEGRAM_API_HASH", "TELEGRAM_CHANNEL_PRUEBA_XAU","TIME_TO_EXPIRE_SIGNAL","TELEGRAM_CHANNEL_JORGE_SINTETICOS","TELEGRAM_CHANNEL_JORGE_FOREX","TELEGRAM_CHANNEL_JORGE_XAU","TELEGRAM_CHANNEL_JORGE_BTC"]
 for var in required_vars:
     if not os.getenv(var):
         raise ValueError(f"❌ Variable de entorno faltante: {var}")    
@@ -95,7 +95,7 @@ def is_valid_request(account_number, license_key, server_key):
             return True
     return False
 
-def update_account_fields(sheet, account_number, server_key, new_balance, new_last_trade, account_server, broker_company, trade_mode):
+def update_account_fields(sheet, account_number, server_key, new_balance, new_last_trade, trade_mode, account_server, broker_company, risk_per_group):
     """
     Actualiza las columnas 6 y 7 si el account_number y server_key coinciden en la misma fila habilitada.
     """
@@ -114,6 +114,7 @@ def update_account_fields(sheet, account_number, server_key, new_balance, new_la
             sheet.update_cell(idx, 8, trade_mode)
             sheet.update_cell(idx, 9, account_server)
             sheet.update_cell(idx, 10, broker_company)
+            sheet.update_cell(idx, 11, risk_per_group)
             return True, "Actualización exitosa"
 
     return False, "Cuenta no encontrada"
@@ -122,7 +123,7 @@ def update_account_fields(sheet, account_number, server_key, new_balance, new_la
 
 
 # Inicializar cliente de Telethon
-client_telegram = TelegramClient('server_session', api_id, api_hash)
+client_telegram = TelegramClient('local_session', api_id, api_hash)
 telethon_event_loop = None
 
 app = Flask(__name__)
@@ -709,7 +710,7 @@ async def handler(event):
     print(f"message: {message}")
 
     #JORGE BTC
-    if sender_id in [TELEGRAM_CHANNEL_JORGE_BTC, TELEGRAM_CHANNEL_PRUEBA] and is_jorge_btc_signal(message):
+    if sender_id in [TELEGRAM_CHANNEL_JORGE_BTC, TELEGRAM_CHANNEL_PRUEBA_XAU] and is_jorge_btc_signal(message):
         header = "📡 Señal BTC de JORGE VIP Recibida con SL y TP"
 
         print(f"\n🪙 Señal BTC de JORGE VIP CHANNEL detectada:\n{message}\n{'='*60}")
@@ -728,11 +729,11 @@ async def handler(event):
 
             send_order_to_mt5(order_data)
             print(signal_data)
-            await client_telegram.send_message(entity=TELEGRAM_CHANNEL_PRUEBA, message=f"{format_signal_for_telegram(order_data)}")
+            await client_telegram.send_message(entity=TELEGRAM_CHANNEL_PRUEBA_XAU, message=f"{format_signal_for_telegram(order_data)}")
             return
         
     #JORGE XAU
-    if sender_id in [TELEGRAM_CHANNEL_JORGE_XAU, TELEGRAM_CHANNEL_PRUEBA] and is_jorge_gold_signal(message):
+    if sender_id in [TELEGRAM_CHANNEL_JORGE_XAU, TELEGRAM_CHANNEL_PRUEBA_XAU] and is_jorge_gold_signal(message):
         header = "📡 Señal XAU de JORGE VIP Recibida con SL y TP"
 
         print(f"\n🪙 Señal XAU JORGE VIP CHANNEL detectada:\n{message}\n{'='*60}")
@@ -751,11 +752,11 @@ async def handler(event):
 
             send_order_to_mt5(order_data)
             print(signal_data)
-            await client_telegram.send_message(entity=TELEGRAM_CHANNEL_PRUEBA, message=f"{format_signal_for_telegram(order_data)}")
+            await client_telegram.send_message(entity=TELEGRAM_CHANNEL_PRUEBA_XAU, message=f"{format_signal_for_telegram(order_data)}")
             return
     
     #JORGE WELTRADE
-    if sender_id in [TELEGRAM_CHANNEL_JORGE_SINTETICOS, TELEGRAM_CHANNEL_PRUEBA] and is_jorge_weltrade_signal(message):
+    if sender_id in [TELEGRAM_CHANNEL_JORGE_SINTETICOS, TELEGRAM_CHANNEL_PRUEBA_XAU] and is_jorge_weltrade_signal(message):
         header = "📡 Señal WELTRADE de JORGE VIP Recibida con SL y TP"
 
         print(f"\n🪙 Señal WELTRADE JORGE VIP CHANNEL detectada:\n{message}\n{'='*60}")
@@ -774,11 +775,11 @@ async def handler(event):
 
             send_order_to_mt5(order_data)
             print(signal_data)
-            await client_telegram.send_message(entity=TELEGRAM_CHANNEL_PRUEBA, message=f"{format_signal_for_telegram(order_data)}")
+            await client_telegram.send_message(entity=TELEGRAM_CHANNEL_PRUEBA_XAU, message=f"{format_signal_for_telegram(order_data)}")
             return
         
     #JORGE DERIV
-    if sender_id in [TELEGRAM_CHANNEL_JORGE_SINTETICOS, TELEGRAM_CHANNEL_PRUEBA] and is_jorge_deriv_signal(message):
+    if sender_id in [TELEGRAM_CHANNEL_JORGE_SINTETICOS, TELEGRAM_CHANNEL_PRUEBA_XAU] and is_jorge_deriv_signal(message):
         header = "📡 Señal DERIV de JORGE VIP Recibida con SL y TP"
 
         print(f"\n🪙 Señal DERIV JORGE VIP CHANNEL detectada:\n{message}\n{'='*60}")
@@ -797,11 +798,11 @@ async def handler(event):
 
             send_order_to_mt5(order_data)
             print(signal_data)
-            await client_telegram.send_message(entity=TELEGRAM_CHANNEL_PRUEBA, message=f"{format_signal_for_telegram(order_data)}")
+            await client_telegram.send_message(entity=TELEGRAM_CHANNEL_PRUEBA_XAU, message=f"{format_signal_for_telegram(order_data)}")
             return
 
     #JORGE FOREX
-    if sender_id in [TELEGRAM_CHANNEL_JORGE_FOREX, TELEGRAM_CHANNEL_PRUEBA] and is_jorge_forex_signal(message):
+    if sender_id in [TELEGRAM_CHANNEL_JORGE_FOREX, TELEGRAM_CHANNEL_PRUEBA_XAU] and is_jorge_forex_signal(message):
         header = "📡 Señal FOREX de JORGE VIP Recibida con SL y TP"
 
         print(f"\n🪙 Señal FOREX JORGE VIP CHANNEL detectada:\n{message}\n{'='*60}")
@@ -820,7 +821,7 @@ async def handler(event):
 
             send_order_to_mt5(order_data)
             print(signal_data)
-            await client_telegram.send_message(entity=TELEGRAM_CHANNEL_PRUEBA, message=f"{format_signal_for_telegram(order_data)}")
+            await client_telegram.send_message(entity=TELEGRAM_CHANNEL_PRUEBA_XAU, message=f"{format_signal_for_telegram(order_data)}")
             return
       
     else:
@@ -832,7 +833,7 @@ async def handler(event):
             header = "⚠️ Se recibió un mensaje del grupo Jorge VIP XAU, pero no es una señal"
         elif sender_id  == TELEGRAM_CHANNEL_JORGE_BTC:
             header = "⚠️ Se recibió un mensaje del grupo Jorge VIP BTC, pero no es una señal"
-        elif sender_id  == TELEGRAM_CHANNEL_PRUEBA:
+        elif sender_id  == TELEGRAM_CHANNEL_PRUEBA_XAU:
             header = "⚠️ Se recibió un mensaje del grupo de prueba, pero no es una señal"
         else:
             # header = "⚠️ Se recibió un mensaje, pero no es de otro canal"
@@ -840,7 +841,7 @@ async def handler(event):
     # Enviar mensaje al canal
     try:
         # await client_telegram.send_message(entity=target_channel, message=f"{header}\n\n{message}")
-        await client_telegram.send_message(entity=TELEGRAM_CHANNEL_PRUEBA, message=f"{header}\n\n{message}")
+        await client_telegram.send_message(entity=TELEGRAM_CHANNEL_PRUEBA_XAU, message=f"{header}\n\n{message}")
         print("✅ Mensaje enviado al canal destino.")
     except Exception as e:
         print(f"❌ Error al enviar mensaje al canal: {e}")
@@ -876,9 +877,9 @@ def get_jorge_xau_signal():
     global latest_signal_jorge_xau
 
     # Autenticación requerida
-    account_number = request.args.get("account")
-    license_key = request.args.get("key")
-    server_key = request.args.get("server")
+    account_number = request.args.get("account_number")
+    license_key = request.args.get("license_key")
+    server_key = request.args.get("server_key")
 
     if not is_valid_request(account_number, license_key, server_key):
         return "Unauthorized", 401
@@ -904,12 +905,13 @@ def update_account():
     account_number = data.get("account")
     account_balance = data.get("balance")
     last_trade = data.get("last_trade")
+    server_key = data.get("server_key")
     account_server = data.get("account_server")
     broker_company = data.get("broker_company")
     trade_mode = data.get("trade_mode")
-    server_key = data.get("server_key")
+    risk_per_group = data.get("risk_per_group")
 
-    if not all([account_number, account_balance, last_trade, server_key]):
+    if not all([account_number, account_balance, last_trade, server_key, account_server, broker_company, trade_mode, risk_per_group]):
         return jsonify({"error": "Faltan parámetros"}), 400
 
     # Validación + actualización
@@ -919,9 +921,10 @@ def update_account():
         server_key,
         account_balance,
         last_trade,
+        trade_mode,
         account_server,
         broker_company,
-        trade_mode
+        risk_per_group
     )
 
     if success:
