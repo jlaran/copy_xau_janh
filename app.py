@@ -95,7 +95,7 @@ def is_valid_request(account_number, license_key, server_key):
             return True
     return False
 
-def update_account_fields(sheet, account_number, server_key, new_balance, new_last_trade):
+def update_account_fields(sheet, account_number, server_key, new_balance, new_last_trade, account_server, broker_company, trade_mode):
     """
     Actualiza las columnas 6 y 7 si el account_number y server_key coinciden en la misma fila habilitada.
     """
@@ -111,11 +111,12 @@ def update_account_fields(sheet, account_number, server_key, new_balance, new_la
             # Columnas F (6) y G (7)
             sheet.update_cell(idx, 6, new_balance)
             sheet.update_cell(idx, 7, new_last_trade)
+            sheet.update_cell(idx, 8, trade_mode)
+            sheet.update_cell(idx, 9, account_server)
+            sheet.update_cell(idx, 10, broker_company)
             return True, "Actualización exitosa"
 
     return False, "Cuenta no encontrada"
-
-
 
 #------------------------------------------ Fin Configuración de spreadsheet -------------------------------------
 
@@ -903,6 +904,9 @@ def update_account():
     account_number = data.get("account")
     account_balance = data.get("balance")
     last_trade = data.get("last_trade")
+    account_server = data.get("account_server")
+    broker_company = data.get("broker_company")
+    trade_mode = data.get("trade_mode")
     server_key = data.get("server_key")
 
     if not all([account_number, account_balance, last_trade, server_key]):
@@ -914,7 +918,10 @@ def update_account():
         account_number,
         server_key,
         account_balance,
-        last_trade
+        last_trade,
+        account_server,
+        broker_company,
+        trade_mode
     )
 
     if success:
