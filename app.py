@@ -104,7 +104,7 @@ def is_valid_request(account_number, license_key, server_key):
         #     user["server_key"] == str(server_key).strip() and
         #     user["enabled"].lower() == "true"
         # ):
-            return True
+            #return True
     return False
 
 def update_account_fields(sheet, account_number, server_key, new_balance, new_last_trade, trade_mode, account_server, broker_company, risk_per_group):
