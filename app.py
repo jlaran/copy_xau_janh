@@ -893,11 +893,13 @@ def recibir_desde_mt5():
     #     return jsonify({"status": "error", "mensaje": "Licencia inválida"}), 403
 
     # Si todo está bien, responder
-    return jsonify({
-        "status": "ok",
-        "mensaje": "Autenticación exitosa",
-        "valor": 42
-    })
+    # return jsonify({
+    #     "status": "ok",
+    #     "mensaje": "Autenticación exitosa",
+    #     "valor": 42
+    # })
+
+    return {"status": "ok", "message": "working!"}
 
 if __name__ == "__main__":
     app.run(debug=True)
