@@ -81,7 +81,7 @@ def get_authorized_users():
             {k: str(v).strip() for k, v in row.items()}
             for row in sheet.get_all_records()
         ]
-                
+
         authorized_users_cache_time = now
         return authorized_users_cache
     except Exception as e:
@@ -916,6 +916,7 @@ def recibir_desde_mt5():
 
 @app.route("/mt5/xau/execute", methods=["POST"])
 def get_jorge_xau_signal():
+    global latest_signal_jorge_xau
     try:
         data = request.get_json(force=True)  # fuerza decodificación JSON
     except Exception as e:
