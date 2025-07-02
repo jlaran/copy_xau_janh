@@ -41,6 +41,11 @@ RAW_JSON = os.getenv("GOOGLE_CREDENTIALS")
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")  # ID del Google Sheet desde la URL
 WORKSHEET_NAME = os.getenv("WORKSHEET_NAME")
 
+# Variables para caché de Google Sheets
+authorized_users_cache = None
+authorized_users_cache_time = 0
+AUTHORIZED_CACHE_TTL = 300  # en segundos (5 minutos)
+
 required_vars = ["SPREADSHEET_ID", "WORKSHEET_NAME", "GOOGLE_CREDENTIALS", "TELEGRAM_API", "TELEGRAM_API_HASH", "TELEGRAM_CHANNEL_PRUEBA_XAU","TIME_TO_EXPIRE_SIGNAL","TELEGRAM_CHANNEL_JORGE_SINTETICOS","TELEGRAM_CHANNEL_JORGE_FOREX","TELEGRAM_CHANNEL_JORGE_XAU","TELEGRAM_CHANNEL_JORGE_BTC"]
 for var in required_vars:
     if not os.getenv(var):
@@ -59,30 +64,21 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 sheet = client.open_by_key(SPREADSHEET_ID).worksheet(WORKSHEET_NAME)
 
-def get_current_sheet():
-    sheet = client.open_by_key(SPREADSHEET_ID).worksheet(WORKSHEET_NAME)
-    return sheet
-
 def get_authorized_users():
-    sheet = get_current_sheet()
-    records = sheet.get_all_records()
+    global authorized_users_cache, authorized_users_cache_time
 
-    authorized = []
-    for row in records:
-        # Validaciones básicas
-        if (
-            str(row.get("enabled", "")).strip().upper() == "TRUE" and
-            row.get("account_number") and
-            row.get("license_key") and
-            row.get("server_key")
-        ):
-            authorized.append({
-                "account_number": str(row["account_number"]).strip(),
-                "license_key": str(row["license_key"]).strip(),
-                "server_key": str(row["server_key"]).strip()
-            })
+    now = time.time()
+    if authorized_users_cache and now - authorized_users_cache_time < AUTHORIZED_CACHE_TTL:
+        return authorized_users_cache
 
-    return authorized
+    # Si expiró el caché o nunca se cargó, hacemos la lectura
+    try:
+        authorized_users_cache = sheet.get_all_records()
+        authorized_users_cache_time = now
+        return authorized_users_cache
+    except Exception as e:
+        print("Error al obtener datos de Google Sheets:", e)
+        return []
 
 def is_valid_request(account_number, license_key, server_key):
     authorized_users = get_authorized_users()
