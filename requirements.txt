@@ -1,0 +1,11 @@
+telethon
+python-telegram-bot
+asyncio
+dotenv
+python-binance
+flask
+gunicorn
+hypercorn
+gspread
+oauth2client
+google-auth
