@@ -949,6 +949,7 @@ def update_account():
         print(request)
         print(data)
     except Exception as e:
+        print(request)
         print("❌ Error decoding JSON:", e)
         return "Bad Request", 400
 
