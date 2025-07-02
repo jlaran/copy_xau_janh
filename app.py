@@ -87,16 +87,14 @@ def is_valid_request(account_number, license_key, server_key):
 
     for user in authorized_users:
         if (user["account_number"] == str(account_number).strip()):
+            print("--------------------------------")
+            print("--------------------------------")
             print("COINCIDE LA CUENTA!!")
+            print(user["account_number"])
+            print(str(account_number).strip())
+            print("--------------------------------")
+            print("--------------------------------")
 
-        if (user["license_key"] == str(license_key).strip()):
-            print("COINCIDE LA LICENCIA!!")
-
-        if (user["server_key"] == str(server_key).strip()):
-            print("COINCIDE EL SERVER KEY!!")
-
-        if (user["enabled"].lower() == "true"):
-            print("ESTA HABILITADO!!")
 
         # if (
         #     user["account_number"] == str(account_number).strip() and
@@ -104,7 +102,7 @@ def is_valid_request(account_number, license_key, server_key):
         #     user["server_key"] == str(server_key).strip() and
         #     user["enabled"].lower() == "true"
         # ):
-            #return True
+            return True
     return False
 
 def update_account_fields(sheet, account_number, server_key, new_balance, new_last_trade, trade_mode, account_server, broker_company, risk_per_group):
