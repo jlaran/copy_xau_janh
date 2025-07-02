@@ -76,6 +76,12 @@ def get_authorized_users():
     # Si expiró el caché o nunca se cargó, hacemos la lectura
     try:
         authorized_users_cache = sheet.get_all_records()
+
+        authorized_users_cache = [
+            {k: str(v).strip() for k, v in row.items()}
+            for row in sheet.get_all_records()
+        ]
+                
         authorized_users_cache_time = now
         return authorized_users_cache
     except Exception as e:
