@@ -941,18 +941,17 @@ def get_jorge_xau_signal():
     return jsonify(latest_signal_jorge_xau["data"])
 
 
-@app.route("/mt5/xau/update-account", methods=["POST"])
-def update_account():
-    try:
-        data = request.get_json(force=True)  # fuerza decodificación JSON
+# @app.route("/mt5/xau/update-account", methods=["POST"])
+# def update_account():
+#     try:
+#         data = request.get_json(force=True)  # fuerza decodificación JSON
 
-        print(request)
-        print(data)
-    except Exception as e:
-        print(request)
-        print("❌ Error decoding JSON:", e)
-        return "Bad Request", 400
-    return
+#         print(request)
+#         print(data)
+#     except Exception as e:
+#         print(request)
+#         print("❌ Error decoding JSON:", e)
+#         return "Bad Request", 400
 
     # # Validaciones
     # account_number = data.get("account")
