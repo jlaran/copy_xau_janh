@@ -876,21 +876,21 @@ def ping():
 
 @app.route("/mt5/xau/post-receptor", methods=["POST"])
 def recibir_desde_mt5():
-    data = request.get_json()
+    # data = request.get_json()
 
-    if not data:
-        return jsonify({"error": "No se recibió JSON"}), 400
+    # if not data:
+    #     return jsonify({"error": "No se recibió JSON"}), 400
 
-    account_number = data.get("account_number")
-    license_key = data.get("license_key")
-    server_key = data.get("server_key")
+    # account_number = data.get("account_number")
+    # license_key = data.get("license_key")
+    # server_key = data.get("server_key")
 
-    if not account_number or not license_key or not server_key:
-        return jsonify({"error": "Datos incompletos"}), 400
+    # if not account_number or not license_key or not server_key:
+    #     return jsonify({"error": "Datos incompletos"}), 400
 
-    # Aquí puedes agregar lógica para validar estos datos, por ejemplo:
-    if license_key != "ABC123":
-        return jsonify({"status": "error", "mensaje": "Licencia inválida"}), 403
+    # # Aquí puedes agregar lógica para validar estos datos, por ejemplo:
+    # if license_key != "ABC123":
+    #     return jsonify({"status": "error", "mensaje": "Licencia inválida"}), 403
 
     # Si todo está bien, responder
     return jsonify({
