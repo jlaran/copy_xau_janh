@@ -874,7 +874,7 @@ def ping():
 
 
 
-@app.route("/mt5/xau/post-receptor", methods=["GET"])
+@app.route("/mt5/xau/post-receptor", methods=["POST"])
 def recibir_desde_mt5():
     data = request.get_json()
 
