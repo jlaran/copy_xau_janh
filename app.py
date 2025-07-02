@@ -86,34 +86,24 @@ def is_valid_request(account_number, license_key, server_key):
     authorized_users = get_authorized_users()
 
     for user in authorized_users:
+        if (user["account_number"] == str(account_number).strip()):
+            print("COINCIDE LA CUENTA!!")
 
-        print("--------------------------------")
-        print("--------------------------------")
-        print("VIENE DEL LLAMADO")
-        print(user)
-        print(str(account_number).strip())
-        print(str(license_key).strip())
-        print(str(server_key).strip())
-        print("--------------------------------")
-        print("--------------------------------")
+        if (user["license_key"] == str(license_key).strip()):
+            print("COINCIDE LA LICENCIA!!")
 
-        print("--------------------------------")
-        print("--------------------------------")
-        print("VIENE DEL EXCEL")
-        print(user)
-        print(str(account_number).strip())
-        print(str(license_key).strip())
-        print(str(server_key).strip())
-        print("--------------------------------")
-        print("--------------------------------")
+        if (user["server_key"] == str(server_key).strip()):
+            print("COINCIDE EL SERVER KEY!!")
 
+        if (user["enabled"].lower() == "true"):
+            print("ESTA HABILITADO!!")
 
-        if (
-            user["account_number"] == str(account_number).strip() and
-            user["license_key"] == str(license_key).strip() and
-            user["server_key"] == str(server_key).strip() and
-            user["enabled"].lower() == "true"
-        ):
+        # if (
+        #     user["account_number"] == str(account_number).strip() and
+        #     user["license_key"] == str(license_key).strip() and
+        #     user["server_key"] == str(server_key).strip() and
+        #     user["enabled"].lower() == "true"
+        # ):
             return True
     return False
 
