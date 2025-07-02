@@ -901,16 +901,6 @@ def recibir_desde_mt5():
 
     return {"status": "ok", "message": "working!"}
 
-if __name__ == "__main__":
-    app.run(debug=True)
-
-
-
-
-
-
-
-
 #-------------- GOLD ------------------
 
 @app.route("/mt5/xau/execute", methods=["POST"])
