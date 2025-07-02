@@ -84,6 +84,9 @@ def get_authorized_users():
 
 def is_valid_request(account_number, license_key, server_key):
     authorized_users = get_authorized_users()
+
+    print(authorized_users);
+
     for user in authorized_users:
         if (
             user["account_number"] == str(account_number).strip() and
@@ -917,6 +920,10 @@ def get_jorge_xau_signal():
     account_number = data.get("account_number")
     license_key = data.get("license_key")
     server_key = data.get("server_key")
+
+    print(account_number)
+    print(license_key)
+    print(server_key)
 
     if not is_valid_request(account_number, license_key, server_key):
         return "Unauthorized", 401
