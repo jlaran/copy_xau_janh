@@ -84,6 +84,9 @@ def get_authorized_users():
 
 def is_valid_request(account_number, license_key, server_key):
     authorized_users = get_authorized_users()
+
+    print("Contenido del cache autorizado:", authorized_users_cache)
+
     for user in authorized_users:
         print("-------------------------")
         print("-------------------------")
