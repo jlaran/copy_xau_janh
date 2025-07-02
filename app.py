@@ -88,20 +88,13 @@ def is_valid_request(account_number, license_key, server_key):
     print("Contenido del cache autorizado:", authorized_users_cache)
 
     for user in authorized_users:
-        print("-------------------------")
-        print("-------------------------")
-        print(user["license_key"])
-        print(user["server_key"])
-        print(user["enabled"])
-        print("-------------------------")
-        print("-------------------------")
-        # if (
-        #     user["account_number"] == str(account_number).strip() and
-        #     user["license_key"] == str(license_key).strip() and
-        #     user["server_key"] == str(server_key).strip() and
-        #     user["enabled"].lower() == "true"
-        # ):
-        #     return True
+        if (
+            str(user["account_number"]).strip() == str(account_number).strip() and
+            str(user["license_key"]).strip() == str(license_key).strip() and
+            str(user["server_key"]).strip() == str(server_key).strip() and
+            str(user["enabled"]).strip().lower() == "true"
+        ):
+            return True
     return False
 
 def update_account_fields(sheet, account_number, server_key, new_balance, new_last_trade, trade_mode, account_server, broker_company, risk_per_group):
