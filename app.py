@@ -878,9 +878,6 @@ def ping():
 
 
 
-
-
-
 @app.route("/mt5/xau/post-receptor", methods=["POST"])
 def recibir_desde_mt5():
     data = request.get_json(force=True)  # Usa `force=True` si sigue fallando
