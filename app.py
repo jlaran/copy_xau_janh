@@ -119,7 +119,7 @@ def update_account_fields(sheet, account_number, server_key, new_balance, new_la
 
 
 # Inicializar cliente de Telethon
-client_telegram = TelegramClient('local_session', api_id, api_hash)
+client_telegram = TelegramClient('server_session', api_id, api_hash)
 telethon_event_loop = None
 
 app = Flask(__name__)
