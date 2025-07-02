@@ -946,7 +946,9 @@ def get_jorge_xau_signal():
 
 @app.route("/mt5/xau/update-account", methods=["POST"])
 def update_account():
-    data = request.json
+    data = request.get_json(force=True)  # fuerza decodificación JSON
+
+    print(data)
 
     # Validaciones
     account_number = data.get("account")
