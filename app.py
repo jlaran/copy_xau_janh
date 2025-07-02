@@ -892,7 +892,7 @@ def recibir_desde_mt5():
         return jsonify({"error": "Datos incompletos"}), 400
 
     # Aquí puedes agregar lógica para validar estos datos, por ejemplo:
-    if license_key != "ABC123":
+    if license_key != "hMWYjjbA8GBjGLfSQDEw2KM8uqgvUIoA0HTfUZawfWZVO5glMZbP3gu9":
         return jsonify({"status": "error", "mensaje": "Licencia inválida"}), 403
 
     #Si todo está bien, responder
