@@ -871,7 +871,7 @@ def ping():
 @app.route("/mt5/xau/execute", methods=["POST"])
 def get_jorge_xau_signal():
     global latest_signal_jorge_xau
-    data = request.json
+    data = request.get_json(force=True)
 
     # Autenticación requerida
     account_number = data.get("account_number")
