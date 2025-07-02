@@ -876,7 +876,10 @@ def ping():
 
 @app.route("/mt5/xau/post-receptor", methods=["POST"])
 def recibir_desde_mt5():
-    data = request.get_json()
+    data = request.get_json(force=True)  # Usa `force=True` si sigue fallando
+
+    if not data:
+        return "No JSON recibido", 400
 
     if not data:
         return jsonify({"error": "No se recibió JSON"}), 400
