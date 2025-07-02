@@ -878,6 +878,8 @@ def get_jorge_xau_signal():
     license_key = data.get("license_key")
     server_key = data.get("server_key")
 
+    print("Cuenta:", account_number, " Licencia:", license_key, " Servidor:", server_key)
+
     if not is_valid_request(account_number, license_key, server_key):
         return "Unauthorized", 401
     
