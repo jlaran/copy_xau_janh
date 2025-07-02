@@ -14,6 +14,8 @@ from google.oauth2.service_account import Credentials
 
 load_dotenv()
 
+SESSION_TELEGRAM = 'server_session';
+
 # === Configuración ===
 api_id = int(os.getenv("TELEGRAM_API"))
 api_hash = os.getenv("TELEGRAM_API_HASH")
@@ -119,7 +121,7 @@ def update_account_fields(sheet, account_number, server_key, new_balance, new_la
 
 
 # Inicializar cliente de Telethon
-client_telegram = TelegramClient('server_session', api_id, api_hash)
+client_telegram = TelegramClient(SESSION_TELEGRAM, api_id, api_hash)
 telethon_event_loop = None
 
 app = Flask(__name__)
@@ -870,22 +872,25 @@ def ping():
 
 @app.route("/mt5/xau/execute", methods=["POST"])
 def get_jorge_xau_signal():
-    global latest_signal_jorge_xau
-    data = request.get_json(force=True)
+    try:
+        data = request.get_json(force=True)  # fuerza decodificación JSON
+    except Exception as e:
+        print("❌ Error decoding JSON:", e)
+        return "Bad Request", 400
 
-    # Autenticación requerida
+    print("✅ JSON recibido:", data)
+
     account_number = data.get("account_number")
     license_key = data.get("license_key")
     server_key = data.get("server_key")
 
-    print("Cuenta:", account_number, " Licencia:", license_key, " Servidor:", server_key)
-
     if not is_valid_request(account_number, license_key, server_key):
         return "Unauthorized", 401
-    
+
     if not latest_signal_jorge_xau:
         return "", 204
-    
+
+    # TTL y retorno
     now = datetime.utcnow()
     created = latest_signal_jorge_xau["timestamp"]
     ttl = latest_signal_jorge_xau["ttl"]
@@ -895,6 +900,7 @@ def get_jorge_xau_signal():
         return "", 204
 
     return jsonify(latest_signal_jorge_xau["data"])
+
 
 @app.route("/mt5/xau/update-account", methods=["POST"])
 def update_account():
