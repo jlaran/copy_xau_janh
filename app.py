@@ -874,38 +874,6 @@ def ping():
     return {"status": "ok", "message": "working!"}
 
 #========== SIGNALS JORGE =============
-
-
-
-
-@app.route("/mt5/xau/post-receptor", methods=["POST"])
-def recibir_desde_mt5():
-    data = request.get_json(force=True)  # Usa `force=True` si sigue fallando
-
-    if not data:
-        return "No JSON recibido", 400
-
-    if not data:
-        return jsonify({"error": "No se recibió JSON"}), 400
-
-    account_number = data.get("account_number")
-    license_key = data.get("license_key")
-    server_key = data.get("server_key")
-
-    if not account_number or not license_key or not server_key:
-        return jsonify({"error": "Datos incompletos"}), 400
-
-    # Aquí puedes agregar lógica para validar estos datos, por ejemplo:
-    if license_key != "hMWYjjbA8GBjGLfSQDEw2KM8uqgvUIoA0HTfUZawfWZVO5glMZbP3gu9":
-        return jsonify({"status": "error", "mensaje": "Licencia inválida"}), 403
-
-    #Si todo está bien, responder
-    return jsonify({
-        "status": "ok",
-        "mensaje": "Autenticación exitosa",
-        "valor": 42
-    })
-
 #-------------- GOLD ------------------
 
 @app.route("/mt5/xau/execute", methods=["POST"])
@@ -941,48 +909,48 @@ def get_jorge_xau_signal():
     return jsonify(latest_signal_jorge_xau["data"])
 
 
-# @app.route("/mt5/xau/update-account", methods=["POST"])
-# def update_account():
-#     try:
-#         data = request.get_json(force=True)  # fuerza decodificación JSON
+@app.route("/mt5/xau/update-account", methods=["POST"])
+def update_account():
+    try:
+        data = request.get_json(force=True)  # fuerza decodificación JSON
 
-#         print(request)
-#         print(data)
-#     except Exception as e:
-#         print(request)
-#         print("❌ Error decoding JSON:", e)
-#         return "Bad Request", 400
+        print(request)
+        print(data)
+    except Exception as e:
+        print(request)
+        print("❌ Error decoding JSON:", e)
+        return "Bad Request", 400
 
-    # # Validaciones
-    # account_number = data.get("account")
-    # account_balance = data.get("balance")
-    # last_trade = data.get("last_trade")
-    # server_key = data.get("server_key")
-    # account_server = data.get("account_server")
-    # broker_company = data.get("broker_company")
-    # trade_mode = data.get("trade_mode")
-    # risk_per_group = data.get("risk_per_group")
+    # Validaciones
+    account_number = data.get("account")
+    account_balance = data.get("balance")
+    last_trade = data.get("last_trade")
+    server_key = data.get("server_key")
+    account_server = data.get("account_server")
+    broker_company = data.get("broker_company")
+    trade_mode = data.get("trade_mode")
+    risk_per_group = data.get("risk_per_group")
 
-    # if not all([account_number, account_balance, last_trade, server_key, account_server, broker_company, trade_mode, risk_per_group]):
-    #     return jsonify({"error": "Faltan parámetros"}), 400
+    if not all([account_number, account_balance, last_trade, server_key, account_server, broker_company, trade_mode, risk_per_group]):
+        return jsonify({"error": "Faltan parámetros"}), 400
 
-    # # Validación + actualización
-    # success, message = update_account_fields(
-    #     sheet,
-    #     account_number,
-    #     server_key,
-    #     account_balance,
-    #     last_trade,
-    #     trade_mode,
-    #     account_server,
-    #     broker_company,
-    #     risk_per_group
-    # )
+    # Validación + actualización
+    success, message = update_account_fields(
+        sheet,
+        account_number,
+        server_key,
+        account_balance,
+        last_trade,
+        trade_mode,
+        account_server,
+        broker_company,
+        risk_per_group
+    )
 
-    # if success:
-    #     return jsonify({"message": message}), 200
-    # else:
-    #     return jsonify({"error": message}), 401
+    if success:
+        return jsonify({"message": message}), 200
+    else:
+        return jsonify({"error": message}), 401
 
 #-------------- GOLD ------------------
 
