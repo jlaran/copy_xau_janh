@@ -125,7 +125,7 @@ def update_account_fields(sheet, account_number, server_key, new_balance, new_la
     return False, "Cuenta no encontrada"
 
 
-def update_ea_status(sheet, account_number, server_key, ea_status):
+def update_ea_status_in_sheet(sheet, account_number, server_key, ea_status):
     """
     Actualiza las columnas 12 si el account_number y server_key coinciden en la misma fila habilitada.
     """
@@ -968,7 +968,7 @@ def update_account():
         return jsonify({"error": message}), 401
     
 @app.route("/mt5/xau/update-ea-status", methods=["POST"])
-def update_ea_status_endpoint():
+def update_ea_status():
     try:
         data = request.get_json(force=True)  # fuerza decodificación JSON
     except Exception as e:
@@ -984,7 +984,7 @@ def update_ea_status_endpoint():
         return jsonify({"error": "Faltan parámetros"}), 400
 
     # Validación + actualización
-    success, message = update_ea_status(
+    success, message = update_ea_status_in_sheet(
         sheet,
         account_number,
         server_key,
