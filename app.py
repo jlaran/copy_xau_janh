@@ -968,7 +968,7 @@ def update_account():
         return jsonify({"error": message}), 401
     
 @app.route("/mt5/xau/update-ea-status", methods=["POST"])
-def update_ea_status():
+def update_ea_status_endpoint():
     try:
         data = request.get_json(force=True)  # fuerza decodificación JSON
     except Exception as e:
