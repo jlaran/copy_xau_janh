@@ -928,7 +928,7 @@ def update_account():
     risk_per_group = data.get("risk_per_group")
 
     if not all([account_number, account_balance, last_trade, server_key, account_server, broker_company, trade_mode, risk_per_group]):
-        return jsonify({"error": "Faltan parámetros"}), 400
+        return jsonify({"error": "Faltan parámetros"}), 404
 
     # Validación + actualización
     success, message = update_account_fields(
