@@ -114,12 +114,12 @@ def update_account_fields(sheet, account_number, server_key, new_balance, new_la
                 return False, "Server key inválida"
             
             # Columnas F (6) y G (7)
-            sheet.update_cell(idx, 6, new_balance)
-            sheet.update_cell(idx, 7, new_last_trade)
-            sheet.update_cell(idx, 8, trade_mode)
-            sheet.update_cell(idx, 9, account_server)
-            sheet.update_cell(idx, 10, broker_company)
-            sheet.update_cell(idx, 11, risk_per_group)
+            sheet.update_cell(idx, 5, new_balance)
+            sheet.update_cell(idx, 6, new_last_trade)
+            sheet.update_cell(idx, 7, trade_mode)
+            sheet.update_cell(idx, 8, account_server)
+            sheet.update_cell(idx, 9, broker_company)
+            sheet.update_cell(idx, 10, risk_per_group)
             return True, "Actualización exitosa"
 
     return False, "Cuenta no encontrada"
@@ -139,7 +139,7 @@ def update_ea_status_in_sheet(sheet, account_number, server_key, ea_status):
                 return False, "Server key inválida"
             
             # Columnas L (12)
-            sheet.update_cell(idx, 12, ea_status)
+            sheet.update_cell(idx, 11, ea_status)
             return True, "Actualización exitosa"
 
     return False, "Cuenta no encontrada"
@@ -894,7 +894,7 @@ def ping():
     return {"status": "ok", "message": "working!"}
 
 #========== SIGNALS JORGE =============
-#-------------- GOLD ------------------
+#-------------- START GOLD ------------------
 
 @app.route("/mt5/xau/execute", methods=["POST"])
 def get_jorge_xau_signal():
@@ -996,7 +996,7 @@ def update_ea_status():
     else:
         return jsonify({"error": message}), 401
 
-#-------------- GOLD ------------------
+#--------------- END GOLD -------------------
 
 # @app.route("/mt5/btc/execute", methods=["GET"])
 # def get_jorge_btc_signal():
