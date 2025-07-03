@@ -40,6 +40,8 @@ WATCHED_CHANNELS = [TELEGRAM_CHANNEL_JORGE_SINTETICOS, TELEGRAM_CHANNEL_JORGE_FO
 
 RAW_JSON = os.getenv("GOOGLE_CREDENTIALS")
 
+SERVER_KEY_HIDE = os.getenv("SERVER_KEY_HIDE")
+
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")  # ID del Google Sheet desde la URL
 WORKSHEET_NAME = os.getenv("WORKSHEET_NAME")
 
@@ -48,7 +50,7 @@ authorized_users_cache = None
 authorized_users_cache_time = 0
 AUTHORIZED_CACHE_TTL = 300  # en segundos (5 minutos)
 
-required_vars = ["SPREADSHEET_ID", "WORKSHEET_NAME", "GOOGLE_CREDENTIALS", "TELEGRAM_API", "TELEGRAM_API_HASH", "TELEGRAM_CHANNEL_PRUEBA_XAU","TIME_TO_EXPIRE_SIGNAL","TELEGRAM_CHANNEL_JORGE_SINTETICOS","TELEGRAM_CHANNEL_JORGE_FOREX","TELEGRAM_CHANNEL_JORGE_XAU","TELEGRAM_CHANNEL_JORGE_BTC"]
+required_vars = ["SERVER_KEY_HIDE", "SPREADSHEET_ID", "WORKSHEET_NAME", "GOOGLE_CREDENTIALS", "TELEGRAM_API", "TELEGRAM_API_HASH", "TELEGRAM_CHANNEL_PRUEBA_XAU","TIME_TO_EXPIRE_SIGNAL","TELEGRAM_CHANNEL_JORGE_SINTETICOS","TELEGRAM_CHANNEL_JORGE_FOREX","TELEGRAM_CHANNEL_JORGE_XAU","TELEGRAM_CHANNEL_JORGE_BTC"]
 for var in required_vars:
     if not os.getenv(var):
         raise ValueError(f"❌ Variable de entorno faltante: {var}")    
@@ -94,7 +96,7 @@ def is_valid_request(account_number, license_key, server_key):
         if (
             str(user["account_number"]).strip() == str(account_number).strip() and
             str(user["license_key"]).strip() == str(license_key).strip() and
-            str(user["server_key"]).strip() == str(server_key).strip() and
+            SERVER_KEY_HIDE == str(server_key).strip() and
             str(user["enabled"]).strip().lower() == "true"
         ):
             return True
@@ -110,7 +112,7 @@ def update_account_fields(sheet, account_number, server_key, new_balance, new_la
         if str(row["account_number"]) == str(account_number):
             if str(row["enabled"]).lower() != "true":
                 return False, "Cuenta no habilitada"
-            if str(row["server_key"]) != str(server_key):
+            if SERVER_KEY_HIDE != str(server_key):
                 return False, "Server key inválida"
             
             # Columnas F (6) y G (7)
@@ -135,7 +137,7 @@ def update_ea_status_in_sheet(sheet, account_number, server_key, ea_status):
         if str(row["account_number"]) == str(account_number):
             if str(row["enabled"]).lower() != "true":
                 return False, "Cuenta no habilitada"
-            if str(row["server_key"]) != str(server_key):
+            if SERVER_KEY_HIDE != str(server_key):
                 return False, "Server key inválida"
             
             # Columnas L (12)
