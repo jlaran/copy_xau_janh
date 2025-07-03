@@ -124,6 +124,26 @@ def update_account_fields(sheet, account_number, server_key, new_balance, new_la
 
     return False, "Cuenta no encontrada"
 
+
+def update_ea_status(sheet, account_number, server_key, ea_status):
+    """
+    Actualiza las columnas 12 si el account_number y server_key coinciden en la misma fila habilitada.
+    """
+    records = sheet.get_all_records()
+
+    for idx, row in enumerate(records, start=2):  # Asume que la fila 1 es encabezado
+        if str(row["account_number"]) == str(account_number):
+            if str(row["enabled"]).lower() != "true":
+                return False, "Cuenta no habilitada"
+            if str(row["server_key"]) != str(server_key):
+                return False, "Server key inválida"
+            
+            # Columnas L (12)
+            sheet.update_cell(idx, 12, ea_status)
+            return True, "Actualización exitosa"
+
+    return False, "Cuenta no encontrada"
+
 #------------------------------------------ Fin Configuración de spreadsheet -------------------------------------
 
 
@@ -908,7 +928,6 @@ def get_jorge_xau_signal():
 
     return jsonify(latest_signal_jorge_xau["data"])
 
-
 @app.route("/mt5/xau/update-account", methods=["POST"])
 def update_account():
     try:
@@ -928,7 +947,7 @@ def update_account():
     risk_per_group = data.get("risk_per_group")
 
     if not all([account_number, account_balance, last_trade, server_key, account_server, broker_company, trade_mode, risk_per_group]):
-        return jsonify({"error": "Faltan parámetros"}), 404
+        return jsonify({"error": "Faltan parámetros"}), 400
 
     # Validación + actualización
     success, message = update_account_fields(
@@ -941,6 +960,35 @@ def update_account():
         account_server,
         broker_company,
         risk_per_group
+    )
+
+    if success:
+        return jsonify({"message": message}), 200
+    else:
+        return jsonify({"error": message}), 401
+    
+@app.route("/mt5/xau/update-ea-status", methods=["POST"])
+def update_ea_status():
+    try:
+        data = request.get_json(force=True)  # fuerza decodificación JSON
+    except Exception as e:
+        print("❌ Error decoding JSON:", e)
+        return "Bad Request", 400
+
+    # Validaciones
+    account_number = data.get("account")
+    server_key = data.get("server_key")
+    ea_status = data.get("ea_status")
+
+    if not all([account_number]):
+        return jsonify({"error": "Faltan parámetros"}), 400
+
+    # Validación + actualización
+    success, message = update_ea_status(
+        sheet,
+        account_number,
+        server_key,
+        ea_status
     )
 
     if success:
