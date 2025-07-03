@@ -976,11 +976,11 @@ def update_ea_status():
         return "Bad Request", 400
 
     # Validaciones
-    account_number = data.get("account")
-    server_key = data.get("server_key")
-    ea_status = data.get("ea_status")
+    account_number = str(data.get("account"))
+    server_key = str(data.get("server_key"))
+    ea_status = str(data.get("server_key"))
 
-    if not all([account_number]):
+    if not all([account_number, server_key, ea_status]):
         return jsonify({"error": "Faltan parámetros"}), 400
 
     # Validación + actualización
