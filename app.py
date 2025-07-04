@@ -48,8 +48,8 @@ for var in required_vars:
 #----------------------- Configuración de spreadsheet y funciones de Spreadsheet -------------------------
 
 def get_authorized_users():
+    db = SessionLocal()
     try:
-        db = SessionLocal()
         records = db.query(License).all()
 
         authorized_users = [
@@ -61,12 +61,14 @@ def get_authorized_users():
             for user in records
         ]
 
-        db.close()
         return authorized_users
 
     except Exception as e:
         print("❌ Error al obtener datos de la base de datos:", e)
         return []
+
+    finally:
+        db.close()
 
 def is_valid_request(account_number, license_key, server_key):
     authorized_users = get_authorized_users()
