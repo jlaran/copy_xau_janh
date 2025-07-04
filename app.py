@@ -988,7 +988,7 @@ def update_ea_status():
     server_key = str(data.get("server_key"))
     ea_status = str(data.get("ea_status"))
 
-    if not all([account_number, server_key, ea_status]):
+    if not all([account_number, license_key, server_key, ea_status]):
         return jsonify({"error": "Faltan parámetros"}), 400
 
     if not is_valid_request(account_number, license_key, server_key):
