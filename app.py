@@ -937,12 +937,17 @@ def update_account():
     except Exception as e:
         print("❌ Error decoding JSON:", e)
         return "Bad Request", 400
+    
+    account_number = data.get("account")
+    license_key = data.get("license_key")
+    server_key = data.get("server_key")
+    
+    if not is_valid_request(account_number, license_key, server_key):
+        return "Unauthorized", 401
 
     # Validaciones
-    account_number = data.get("account")
     account_balance = data.get("balance")
     last_trade = data.get("last_trade")
-    server_key = data.get("server_key")
     account_server = data.get("account_server")
     broker_company = data.get("broker_company")
     trade_mode = data.get("trade_mode")
@@ -979,11 +984,15 @@ def update_ea_status():
 
     # Validaciones
     account_number = str(data.get("account"))
+    license_key = str(data.get("license_key"))
     server_key = str(data.get("server_key"))
     ea_status = str(data.get("ea_status"))
 
     if not all([account_number, server_key, ea_status]):
         return jsonify({"error": "Faltan parámetros"}), 400
+
+    if not is_valid_request(account_number, license_key, server_key):
+        return "Unauthorized", 401
 
     # Validación + actualización
     success, message = update_ea_status_in_sheet(
