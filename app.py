@@ -976,6 +976,8 @@ def update_account():
     
 @app.route("/mt5/xau/update-ea-status", methods=["POST"])
 def update_ea_status():
+    return "Done", 200
+
     try:
         data = request.get_json(force=True)  # fuerza decodificación JSON
     except Exception as e:
@@ -1006,6 +1008,7 @@ def update_ea_status():
         return jsonify({"message": message}), 200
     else:
         return jsonify({"error": message}), 401
+    
 
 #--------------- END GOLD -------------------
 
