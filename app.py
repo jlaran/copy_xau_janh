@@ -9,8 +9,8 @@ import re
 import asyncio
 import time
 from datetime import datetime, timedelta
-import gspread
-from google.oauth2.service_account import Credentials
+from db import SessionLocal
+from models import AccountStatus, License
 
 load_dotenv()
 
@@ -38,56 +38,34 @@ TIME_TO_EXPIRE_SIGNAL = int(os.getenv("TIME_TO_EXPIRE_SIGNAL"))
 
 WATCHED_CHANNELS = [TELEGRAM_CHANNEL_JORGE_SINTETICOS, TELEGRAM_CHANNEL_JORGE_FOREX, TELEGRAM_CHANNEL_JORGE_XAU, TELEGRAM_CHANNEL_JORGE_BTC, TELEGRAM_CHANNEL_PRUEBA_XAU]
 
-RAW_JSON = os.getenv("GOOGLE_CREDENTIALS")
-
 SERVER_KEY_HIDE = os.getenv("SERVER_KEY_HIDE")
 
-SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")  # ID del Google Sheet desde la URL
-WORKSHEET_NAME = os.getenv("WORKSHEET_NAME")
-
-# Variables para caché de Google Sheets
-authorized_users_cache = None
-authorized_users_cache_time = 0
-AUTHORIZED_CACHE_TTL = 300  # en segundos (5 minutos)
-
-required_vars = ["SERVER_KEY_HIDE", "SPREADSHEET_ID", "WORKSHEET_NAME", "GOOGLE_CREDENTIALS", "TELEGRAM_API", "TELEGRAM_API_HASH", "TELEGRAM_CHANNEL_PRUEBA_XAU","TIME_TO_EXPIRE_SIGNAL","TELEGRAM_CHANNEL_JORGE_SINTETICOS","TELEGRAM_CHANNEL_JORGE_FOREX","TELEGRAM_CHANNEL_JORGE_XAU","TELEGRAM_CHANNEL_JORGE_BTC"]
+required_vars = ["SERVER_KEY_HIDE",  "TELEGRAM_API", "TELEGRAM_API_HASH", "TELEGRAM_CHANNEL_PRUEBA_XAU","TIME_TO_EXPIRE_SIGNAL","TELEGRAM_CHANNEL_JORGE_SINTETICOS","TELEGRAM_CHANNEL_JORGE_FOREX","TELEGRAM_CHANNEL_JORGE_XAU","TELEGRAM_CHANNEL_JORGE_BTC"]
 for var in required_vars:
     if not os.getenv(var):
         raise ValueError(f"❌ Variable de entorno faltante: {var}")    
 
 #----------------------- Configuración de spreadsheet y funciones de Spreadsheet -------------------------
 
-if not RAW_JSON:
-    raise ValueError("❌ Variable de entorno GOOGLE_CREDENTIALS no está definida")
-
-creds_dict = json.loads(RAW_JSON)
-creds = Credentials.from_service_account_info(
-    creds_dict,
-    scopes=["https://www.googleapis.com/auth/spreadsheets"]
-)
-client = gspread.authorize(creds)
-sheet = client.open_by_key(SPREADSHEET_ID).worksheet(WORKSHEET_NAME)
-
 def get_authorized_users():
-    global authorized_users_cache, authorized_users_cache_time
-
-    now = time.time()
-    if authorized_users_cache and now - authorized_users_cache_time < AUTHORIZED_CACHE_TTL:
-        return authorized_users_cache
-
-    # Si expiró el caché o nunca se cargó, hacemos la lectura
     try:
-        authorized_users_cache = sheet.get_all_records()
+        db = SessionLocal()
+        records = db.query(License).all()
 
-        authorized_users_cache = [
-            {k: str(v).strip() for k, v in row.items()}
-            for row in sheet.get_all_records()
+        authorized_users = [
+            {
+                "account_number": str(user.account_number).strip(),
+                "license_key": str(user.license_key).strip(),
+                "enabled": str(user.enabled).lower()
+            }
+            for user in records
         ]
 
-        authorized_users_cache_time = now
-        return authorized_users_cache
+        db.close()
+        return authorized_users
+
     except Exception as e:
-        print("Error al obtener datos de Google Sheets:", e)
+        print("❌ Error al obtener datos de la base de datos:", e)
         return []
 
 def is_valid_request(account_number, license_key, server_key):
@@ -102,49 +80,83 @@ def is_valid_request(account_number, license_key, server_key):
             return True
     return False
 
-def update_account_fields(sheet, account_number, server_key, new_balance, new_last_trade, trade_mode, account_server, broker_company, risk_per_group):
+def update_account_fields_db(account_number, server_key, new_balance, new_last_trade, trade_mode, account_server, broker_company, risk_per_group):
     """
-    Actualiza las columnas 6 y 7 si el account_number y server_key coinciden en la misma fila habilitada.
+    Actualiza los campos de la tabla account_status si la cuenta está habilitada y el server_key es válido.
     """
-    records = sheet.get_all_records()
+    db = SessionLocal()
+    try:
+        # Verificar si la cuenta está habilitada en la tabla de licencias
+        license = db.query(License).filter_by(account_number=str(account_number)).first()
+        if not license:
+            return False, "Cuenta no encontrada"
+        if not license.enabled:
+            return False, "Cuenta no habilitada"
+        if server_key != SERVER_KEY_HIDE:
+            return False, "Server key inválida"
 
-    for idx, row in enumerate(records, start=2):  # Asume que la fila 1 es encabezado
-        if str(row["account_number"]) == str(account_number):
-            if str(row["enabled"]).lower() != "true":
-                return False, "Cuenta no habilitada"
-            if SERVER_KEY_HIDE != str(server_key):
-                return False, "Server key inválida"
-            
-            # Columnas F (6) y G (7)
-            sheet.update_cell(idx, 5, new_balance)
-            sheet.update_cell(idx, 6, new_last_trade)
-            sheet.update_cell(idx, 7, trade_mode)
-            sheet.update_cell(idx, 8, account_server)
-            sheet.update_cell(idx, 9, broker_company)
-            sheet.update_cell(idx, 10, risk_per_group)
-            return True, "Actualización exitosa"
+        # Buscar el registro en account_status
+        status = db.query(AccountStatus).filter_by(account_number=str(account_number)).first()
 
-    return False, "Cuenta no encontrada"
+        if not status:
+            # Si no existe, lo creamos
+            status = AccountStatus(
+                account_number=str(account_number),
+                account_balance=new_balance,
+                last_trade=new_last_trade,
+                account_mode=trade_mode,
+                broker_server=account_server,
+                broker_company=broker_company,
+                risk_per_group=risk_per_group,
+                ea_status="activo"
+            )
+            db.add(status)
+        else:
+            # Actualizar los campos existentes
+            status.account_balance = new_balance
+            status.last_trade = new_last_trade
+            status.account_mode = trade_mode
+            status.broker_server = account_server
+            status.broker_company = broker_company
+            status.risk_per_group = risk_per_group
 
+        db.commit()
+        return True, "Actualización exitosa"
+    except Exception as e:
+        db.rollback()
+        return False, f"Error al actualizar: {e}"
+    finally:
+        db.close()
 
-def update_ea_status_in_sheet(sheet, account_number, server_key, ea_status):
+def update_ea_status_in_db(account_number, server_key, ea_status):
     """
-    Actualiza las columnas 12 si el account_number y server_key coinciden en la misma fila habilitada.
+    Actualiza el campo 'ea_status' en la tabla account_status si la cuenta está habilitada y el server_key es válido.
     """
-    records = sheet.get_all_records()
+    db = SessionLocal()
+    try:
+        # Verificar en la tabla License si la cuenta está habilitada
+        license = db.query(License).filter_by(account_number=str(account_number)).first()
+        if not license:
+            return False, "Cuenta no encontrada"
+        if not license.enabled:
+            return False, "Cuenta no habilitada"
+        if server_key != SERVER_KEY_HIDE:
+            return False, "Server key inválida"
 
-    for idx, row in enumerate(records, start=2):  # Asume que la fila 1 es encabezado
-        if str(row["account_number"]) == str(account_number):
-            if str(row["enabled"]).lower() != "true":
-                return False, "Cuenta no habilitada"
-            if SERVER_KEY_HIDE != str(server_key):
-                return False, "Server key inválida"
-            
-            # Columnas L (12)
-            sheet.update_cell(idx, 11, ea_status)
-            return True, "Actualización exitosa"
+        # Buscar el registro correspondiente en account_status
+        status = db.query(AccountStatus).filter_by(account_number=str(account_number)).first()
+        if not status:
+            return False, "Cuenta no tiene estado registrado"
 
-    return False, "Cuenta no encontrada"
+        # Actualizar solo el campo ea_status
+        status.ea_status = ea_status
+        db.commit()
+        return True, "Actualización exitosa"
+    except Exception as e:
+        db.rollback()
+        return False, f"Error al actualizar: {e}"
+    finally:
+        db.close()
 
 #------------------------------------------ Fin Configuración de spreadsheet -------------------------------------
 
@@ -957,8 +969,7 @@ def update_account():
         return jsonify({"error": "Faltan parámetros"}), 400
 
     # Validación + actualización
-    success, message = update_account_fields(
-        sheet,
+    success, message = update_account_fields_db(
         account_number,
         server_key,
         account_balance,
@@ -976,8 +987,6 @@ def update_account():
     
 @app.route("/mt5/xau/update-ea-status", methods=["POST"])
 def update_ea_status():
-    return "Done", 200
-
     try:
         data = request.get_json(force=True)  # fuerza decodificación JSON
     except Exception as e:
@@ -997,8 +1006,7 @@ def update_ea_status():
         return "Unauthorized", 401
 
     # Validación + actualización
-    success, message = update_ea_status_in_sheet(
-        sheet,
+    success, message = update_ea_status_in_db(
         account_number,
         server_key,
         ea_status
