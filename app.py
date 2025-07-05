@@ -104,23 +104,23 @@ def update_account_fields_db(account_number, server_key, new_balance, new_last_t
             # Si no existe, lo creamos
             status = AccountStatus(
                 account_number=str(account_number),
-                account_balance=new_balance,
-                last_trade=new_last_trade,
-                account_mode=trade_mode,
-                broker_server=account_server,
-                broker_company=broker_company,
-                risk_per_group=risk_per_group,
+                account_balance=str(new_balance),
+                last_trade=str(new_last_trade),
+                account_mode=str(trade_mode),
+                broker_server=str(account_server),
+                broker_company=str(broker_company),
+                risk_per_group=str(risk_per_group),
                 ea_status="activo"
             )
             db.add(status)
         else:
             # Actualizar los campos existentes
-            status.account_balance = new_balance
-            status.last_trade = new_last_trade
-            status.account_mode = trade_mode
-            status.broker_server = account_server
-            status.broker_company = broker_company
-            status.risk_per_group = risk_per_group
+            status.account_balance = str(new_balance)
+            status.last_trade = str(new_last_trade)
+            status.account_mode = str(trade_mode)
+            status.broker_server = str(account_server)
+            status.broker_company = str(broker_company)
+            status.risk_per_group = str(risk_per_group)
 
         db.commit()
         return True, "Actualización exitosa"
@@ -151,7 +151,7 @@ def update_ea_status_in_db(account_number, server_key, ea_status):
             return False, "Cuenta no tiene estado registrado"
 
         # Actualizar solo el campo ea_status
-        status.ea_status = ea_status
+        status.ea_status = str(ea_status)
         db.commit()
         return True, "Actualización exitosa"
     except Exception as e:
