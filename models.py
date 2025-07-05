@@ -1,5 +1,5 @@
 # models.py
-from sqlalchemy import Column, String, Boolean, Float
+from sqlalchemy import Column, String
 from db import Base
 
 class License(Base):
@@ -7,7 +7,7 @@ class License(Base):
 
     account_number = Column(String, primary_key=True, index=True)
     license_key = Column(String)
-    enabled = Column(Boolean, default=True)
+    enabled = Column(String, default="")
 
 
 class AccountStatus(Base):
