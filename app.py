@@ -82,7 +82,7 @@ def is_valid_request(account_number, license_key, server_key):
             return True
     return False
 
-def update_account_fields_db(account_number, server_key, new_balance, new_last_trade, trade_mode, account_server, broker_company, risk_per_group):
+def update_account_fields_db(account_number, server_key, new_balance, new_last_trade, trade_mode, account_server, broker_company, risk_per_group,last_sync):
     """
     Actualiza los campos de la tabla account_status si la cuenta está habilitada y el server_key es válido.
     """
@@ -110,7 +110,8 @@ def update_account_fields_db(account_number, server_key, new_balance, new_last_t
                 broker_server=str(account_server),
                 broker_company=str(broker_company),
                 risk_per_group=str(risk_per_group),
-                ea_status="activo"
+                ea_status="activo",
+                last_sync=str(last_sync)
             )
             db.add(status)
         else:
@@ -121,6 +122,7 @@ def update_account_fields_db(account_number, server_key, new_balance, new_last_t
             status.broker_server = str(account_server)
             status.broker_company = str(broker_company)
             status.risk_per_group = str(risk_per_group)
+            status.last_sync = str(last_sync)
 
         db.commit()
         return True, "Actualización exitosa"
@@ -966,8 +968,9 @@ def update_account():
     broker_company = data.get("broker_company")
     trade_mode = data.get("trade_mode")
     risk_per_group = data.get("risk_per_group")
+    last_sync = data.get("last_sync")
 
-    if not all([account_number, account_balance, last_trade, server_key, account_server, broker_company, trade_mode, risk_per_group]):
+    if not all([account_number, account_balance, last_trade, server_key, account_server, broker_company, trade_mode, risk_per_group, last_sync]):
         return jsonify({"error": "Faltan parámetros"}), 400
 
     # Validación + actualización
@@ -979,7 +982,8 @@ def update_account():
         trade_mode,
         account_server,
         broker_company,
-        risk_per_group
+        risk_per_group,
+        last_sync
     )
 
     if success:
