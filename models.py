@@ -21,3 +21,4 @@ class AccountStatus(Base):
     broker_company = Column(String, default="")
     risk_per_group = Column(String, default="")
     ea_status = Column(String, default="")
+    last_sync = Column(String, default="")

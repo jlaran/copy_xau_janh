@@ -82,7 +82,7 @@ def is_valid_request(account_number, license_key, server_key):
             return True
     return False
 
-def update_account_fields_db(account_number, server_key, new_balance, new_last_trade, trade_mode, account_server, broker_company, risk_per_group,last_sync):
+def update_account_fields_db(account_number, server_key, new_balance, new_last_trade, trade_mode, account_server, broker_company, risk_per_group, last_sync):
     """
     Actualiza los campos de la tabla account_status si la cuenta está habilitada y el server_key es válido.
     """
@@ -989,7 +989,7 @@ def update_account():
     if success:
         return jsonify({"message": message}), 200
     else:
-        return jsonify({"error": message}), 401
+        return jsonify({"error": last_sync}), 404
     
 @app.route("/mt5/xau/update-ea-status", methods=["POST"])
 def update_ea_status():
