@@ -989,7 +989,7 @@ def update_account():
     if success:
         return jsonify({"message": message}), 200
     else:
-        return jsonify({"error": last_sync}), 404
+        return jsonify({"error": message}), 401
     
 @app.route("/mt5/xau/update-ea-status", methods=["POST"])
 def update_ea_status():
