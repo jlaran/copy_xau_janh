@@ -1023,8 +1023,120 @@ def update_ea_status():
     else:
         return jsonify({"error": message}), 401
     
-
 #--------------- END GOLD -------------------
+
+#--------------- START BTC ------------------
+
+@app.route("/mt5/btc/execute", methods=["POST"])
+def get_jorge_btc_signal():
+    global latest_signal_jorge_btc
+    try:
+        data = request.get_json(force=True)  # fuerza decodificación JSON
+    except Exception as e:
+        print("❌ Error decoding JSON:", e)
+        return "Bad Request", 400
+
+    #print("✅ JSON recibido:", data)
+
+    account_number = str(data.get("account_number"))
+    license_key = str(data.get("license_key"))
+    server_key =str(data.get("server_key"))
+
+    if not is_valid_request(account_number, license_key, server_key):
+        return "Unauthorized", 401
+
+    if not latest_signal_jorge_btc:
+        return "", 204
+
+    # TTL y retorno
+    now = datetime.utcnow()
+    created = latest_signal_jorge_btc["timestamp"]
+    ttl = latest_signal_jorge_btc["ttl"]
+
+    if now - created > ttl:
+        latest_signal_jorge_btc = None
+        return "", 204
+
+    return jsonify(latest_signal_jorge_btc["data"])
+
+@app.route("/mt5/btc/update-account", methods=["POST"])
+def update_btc_account():
+    try:
+        data = request.get_json(force=True)  # fuerza decodificación JSON
+    except Exception as e:
+        print("❌ Error decoding JSON:", e)
+        return "Bad Request", 400
+    
+    account_number = data.get("account")
+    license_key = data.get("license_key")
+    server_key = data.get("server_key")
+    
+    if not is_valid_request(account_number, license_key, server_key):
+        return "Unauthorized", 401
+
+    # Validaciones
+    account_balance = data.get("balance")
+    last_trade = data.get("last_trade")
+    account_server = data.get("account_server")
+    broker_company = data.get("broker_company")
+    trade_mode = data.get("trade_mode")
+    risk_per_group = data.get("risk_per_group")
+    last_sync = data.get("last_sync")
+
+    if not all([account_number, account_balance, last_trade, server_key, account_server, broker_company, trade_mode, risk_per_group, last_sync]):
+        return jsonify({"error": "Faltan parámetros"}), 400
+
+    # Validación + actualización
+    success, message = update_account_fields_db(
+        account_number,
+        server_key,
+        account_balance,
+        last_trade,
+        trade_mode,
+        account_server,
+        broker_company,
+        risk_per_group,
+        last_sync
+    )
+
+    if success:
+        return jsonify({"message": message}), 200
+    else:
+        return jsonify({"error": message}), 401
+    
+@app.route("/mt5/btc/update-ea-status", methods=["POST"])
+def update_btc_ea_status():
+    try:
+        data = request.get_json(force=True)  # fuerza decodificación JSON
+    except Exception as e:
+        print("❌ Error decoding JSON:", e)
+        return "Bad Request", 400
+
+    # Validaciones
+    account_number = str(data.get("account"))
+    license_key = str(data.get("license_key"))
+    server_key = str(data.get("server_key"))
+    ea_status = str(data.get("ea_status"))
+
+    if not all([account_number, license_key, server_key, ea_status]):
+        return jsonify({"error": "Faltan parámetros"}), 400
+
+    if not is_valid_request(account_number, license_key, server_key):
+        return "Unauthorized", 401
+
+    # Validación + actualización
+    success, message = update_ea_status_in_db(
+        account_number,
+        server_key,
+        ea_status
+    )
+
+    if success:
+        return jsonify({"message": message}), 200
+    else:
+        return jsonify({"error": message}), 401
+    
+#--------------- END BTC -------------------
 
 # @app.route("/mt5/btc/execute", methods=["GET"])
 # def get_jorge_btc_signal():
