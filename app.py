@@ -8,7 +8,7 @@ import json
 import re
 import asyncio
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from db import SessionLocal
 from models import AccountStatus, License
 
@@ -658,7 +658,7 @@ def send_order_to_mt5(order_data):
     if vendor == "jorge_btc":
         latest_signal_jorge_btc = {
             "data": order_data,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "ttl": timedelta(seconds=TIME_TO_EXPIRE_SIGNAL)
         }
         print(f"📤 Señal de JORGE BTC almacenada: {order_data['symbol']} [{order_data['side']}]")
@@ -666,7 +666,7 @@ def send_order_to_mt5(order_data):
     elif vendor == "jorge_xau":
         latest_signal_jorge_xau = {
             "data": order_data,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "ttl": timedelta(seconds=TIME_TO_EXPIRE_SIGNAL)
         }
         print(f"📤 Señal de JORGE XAU almacenada: {order_data['symbol']} [{order_data['side']}]")
@@ -674,7 +674,7 @@ def send_order_to_mt5(order_data):
     elif vendor == "jorge_forex":
         latest_signal_jorge_forex = {
             "data": order_data,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "ttl": timedelta(seconds=TIME_TO_EXPIRE_SIGNAL)
         }
         print(f"📤 Señal de JORGE FOREX almacenada: {order_data['symbol']} [{order_data['side']}]")
@@ -682,7 +682,7 @@ def send_order_to_mt5(order_data):
     elif vendor == "jorge_weltrade":
         latest_signal_jorge_weltrade = {
             "data": order_data,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "ttl": timedelta(seconds=TIME_TO_EXPIRE_SIGNAL)
         }
         print(f"📤 Señal de JORGE WELTRADE almacenada: {order_data['symbol']} [{order_data['side']}]")
@@ -690,7 +690,7 @@ def send_order_to_mt5(order_data):
     elif vendor == "jorge_deriv":
         latest_signal_jorge_deriv = {
             "data": order_data,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "ttl": timedelta(seconds=TIME_TO_EXPIRE_SIGNAL)
         }
         print(f"📤 Señal de JORGE DERIV almacenada: {order_data['symbol']} [{order_data['side']}]")
@@ -936,9 +936,9 @@ def get_jorge_xau_signal():
         return "", 204
 
     # TTL y retorno
-    now = datetime.utcnow()
-    created = latest_signal_jorge_xau["timestamp"]
-    ttl = latest_signal_jorge_xau["ttl"]
+    now = datetime.now(timezone.utc)
+    created = latest_signal_jorge_xau.get("timestamp")
+    ttl = latest_signal_jorge_xau.get("ttl")
 
     if now - created > ttl:
         latest_signal_jorge_xau = None
@@ -1049,9 +1049,9 @@ def get_jorge_btc_signal():
         return "", 204
 
     # TTL y retorno
-    now = datetime.utcnow()
-    created = latest_signal_jorge_btc["timestamp"]
-    ttl = latest_signal_jorge_btc["ttl"]
+    now = datetime.now(timezone.utc)
+    created = latest_signal_jorge_btc.get("timestamp")
+    ttl = latest_signal_jorge_btc.get("ttl")
 
     if now - created > ttl:
         latest_signal_jorge_btc = None
